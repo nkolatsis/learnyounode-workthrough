@@ -2,10 +2,10 @@ var http = require("http");
 
 http.get(process.argv[2], (response) => {
     var collectData = []
-    response.on("data", collectData.push) // does not work
-    /*response.on("data", (data) => {
+    //response.on("data", collectData.push) // does not work
+    response.on("data", (data) => {
         collectData.push(data)
-    })*/
+    })
     response.on("error", console.error)
     response.on("end", (end) => {
         var dataString = collectData.reduce(function(combined, data) {
@@ -17,6 +17,7 @@ http.get(process.argv[2], (response) => {
 }).on("error", console.error)
 
 /* learnyounode official solution
+
 var http = require('http')
 var bl = require('bl')
 
@@ -29,8 +30,6 @@ http.get(process.argv[2], function (response) {
     console.log(data.length)
     console.log(data)
     }))
-})
-
-
+}}
 
 */
