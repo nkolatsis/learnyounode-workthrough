@@ -1,18 +1,23 @@
 function filterFiles(dir, ext, callback) {
-    var fs = require("fs");
-    var path = require("path");
+    var fs = require("fs")
+    var path = require("path")
 
     fs.readdir(dir, 'utf8', (err, list) => {
         if (err) return callback(err);
 
-        var filterList = [];
+        var filteredList = [];
 
         for (let i = 0; i < list.length; i++) {
             if (path.extname(list[i]) == "." + ext) {
-                filterList.push(list[i]);
+                filteredList.push(list[i]);
             }
         }
-        return callback(null, filterList);
+        /* LearnYouNode standard solution:
+        filteredList = list.filter(function(file) {
+            return path.extname(file) === '.' + ext
+        }) */
+        
+        return callback(null, filteredList);
     })
 }
 
