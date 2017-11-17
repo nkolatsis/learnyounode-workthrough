@@ -1,12 +1,12 @@
 var http = require("http")
 var concat = require("concat-stream")
 
-var queue = []
-queue.push(getPageAsObj(process.argv[2], passObjToQueue))
-queue.push(getPageAsObj(process.argv[3], passObjToQueue))
-queue.push(getPageAsObj(process.argv[4], passObjToQueue))
+for (let i = 2; i < process.argv.length; i++) {
+    passPageToQueue(process.argv[i], i)
+}
 
-function getPageAsObj(argv, callback) {
+var queue = []
+function passPageToQueue(argv, pos) {
     http.get(argv, (response) => {
         var collectedData = []
         response.setEncoding("utf8")
@@ -15,35 +15,61 @@ function getPageAsObj(argv, callback) {
         })
         response.on("error", console.error)
         response.on("end", (end) => {
-            collectedData = collectedData.reduce(function(first, second) {
+            var page = collectedData.reduce(function(first, second) {
                 return first + second
             })
-            return callback(null, Object(data = collectedData, completed = true))
+            queue[pos-2] = page
         })
     }).on("error", console.error)
 }
 
-function passObjToQueue(err, obj) {
-    console.log(obj)
-    completedCount += 1;
-    return obj;
+setInterval(function(){
+    var defined = 0
+    for (let i = 0; i < queue.length; i++) {
+        if (typeof(queue[i] != undefined)) defined +=1
+    }
+    if (defined == process.argv.length - 2) {
+        for (pageObj of queue) {
+            console.log(pageObj)
+        }
+        clearInterval(this)
+    }
+}, 500)
+
+/* official solution
+
+var http = require('http')
+var bl = require('bl')
+var results = []
+var count = 0
+
+function printResults () {
+    for (var i = 0; i < 3; i++) {
+    console.log(results[i])
+    }
 }
 
-var completedCount = 0
-
-setInterval(function(){
-    if (typeof(queue[0]) != undefined && queue[1] != undefined && queue[2] != undefined) {
-        console.log("got here")
-        if (queue[0]["completed"] === true) {
-            if (queue[0]["completed"] === true) {
-                if (queue[0]["completed"] === true) {
-                    console.log(queue[0]["data"])
-                    console.log(queue[1]["data"])
-                    console.log(queue[2]["data"])
-                }
-            }               
+function httpGet (index) {
+    http.get(process.argv[2 + index], function (response) {
+    response.pipe(bl(function (err, data) {
+        if (err) {
+        return console.error(err)
         }
-    }
-    console.log(queue)
-    console.log(completedCount)
-}, 500)
+
+        results[index] = data.toString()
+        count++
+
+        if (count === 3) {
+        printResults()
+        }
+    }))
+    })
+}
+
+for (var i = 0; i < 3; i++) {
+    httpGet(i)
+}
+
+// The logic flow of the official solution is simpler and the program is cleaner.
+
+*/
